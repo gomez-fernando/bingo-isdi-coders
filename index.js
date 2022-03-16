@@ -4,6 +4,10 @@ let goOn = "";
 let acceptCard;
 let randomNumber;
 var usedNumbers = [];
+var lastNumber = 1000;
+var mess = '';
+var bingoComplete = false;
+var linesCounter = 0;
 
 var card = [
   [
@@ -14,7 +18,10 @@ var card = [
       {number: 4, matched: false}, 
       {number: 5, matched: false}
     ],
-    {full: false}
+    [
+      {full: false},
+      {warned: false}
+    ]
   ],
   [
     [
@@ -24,7 +31,10 @@ var card = [
       {number: 9, matched: false}, 
       {number: 10, matched: false}
     ],
-    {full: false}
+    [
+      {full: false},
+      {warned: false}
+    ]
   ],
   [
     [
@@ -34,63 +44,85 @@ var card = [
       {number: 14, matched: false}, 
       {number: 15, matched: false}
     ],
-    {full: false}
-  ],
+    [
+      {full: false},
+      {warned: false}
+    ]
+  ]
 ];
 
+// function to change the matched property in the number object
 const matchNumber = (randomN) => {
   for (let i=0; i < card.length ; i++){
+
     for(let j = 0; j < card[i].length - 1; j++){
+
+        let full = 0;
+
       for (let k = 0; k < card[i][j].length; k++) {
+
         if(card[i][j][k].number === randomN){
           card[i][j][k].matched = true;
-          console.log(card[i][j][k]);
-          console.log(card);
+
+        } 
+
+        if(card[i][j][k].matched === true) full++;
+
+        if(card[i][1].full !== true &&  card[i][1].warned !== true) {
+          if(full === 5) {
+            card[i][1].full = true;
+            card[i][1].warned = true;
+            linesCounter++;
+            alert(`LÍNEA !!!`);
+
+            if (linesCounter === card.length){
+              bingoComplete = true;
+            }
+
+            if (bingoComplete === true){
+              alert(`**********         **********\n\n             BINGO !!!          \n\n**********         **********\n\nAhora puedes consultar en la consola tu puntuación y el ranking del Top 5`);
+
+              alert("FIN DE LA PRIMERA VERSIÓN");
+
+              // showScore();
+              // showRanking();
+              // askAgain();
+            }
+
+          }
         } 
       }
     }
   }
+  // }
   return card;
 }
 
+// function to able to render the bingo card in the console.table format
 const showCard = (input) => {
   let output = [];
   for (let i=0; i < input.length ; i++){
-
-      for(let j = 0; j < input[i].length - 1; j++){
-        let k = [];
-
-        console.log(input[i][j]);
-
-          for(let l = 0; l < input[i][j].length; l++){
-
-              console.log(input[i][j].length);
-              console.log(input[i][j][l].matched);
-              if(input[i][j][l].matched === true){
-                k.push("X");
-                console.log("toca x");
-              } else{
-                k.push(input[i][j][l].number);
-                console.log("toca numero");
-              }
-            
-          }
-          console.log(output);
-          output.push(k);
-      }
-     
+    for(let j = 0; j < input[i].length - 1; j++){
+      let k = [];
+        for(let l = 0; l < input[i][j].length; l++){
+            if(input[i][j][l].matched === true){
+              k.push("X");
+            } else{
+              k.push(input[i][j][l].number);
+            }
+        }
+        output.push(k);
+    }
   }
   return output;
 };
 
-// todo ya está el presentar la card de los aciertos y tenr un array con los números ya usados.
-//También hay una propiedad en el array para guardar si la línea está o no llena
-
+// function to close the session
 const cancelGame = () => {
-  console.log(`Has salido del juego.\nBye ${userName} !`)
+  alert(`Has salido del juego.\nBye ${userName} !`)
 }
 
-
+// App's main function
 const bingo = () =>{
   do {
     userName = prompt(`Bienvenido/a a Bingo Game !!
@@ -105,28 +137,31 @@ Ingresa tu nombre`);
     console.info(`Este es tu cartón`);
     console.table(showCard(card));
 
-    acceptCard = prompt(`Me quedo este cartón -> Ok\nQuiero otro diferente -> Cancelar`);
+    acceptCard = prompt(`Revisa tu cartón en la consola.\n\nMe quedo este cartón -> Ok\nQuiero otro diferente -> Cancelar\n**En esta versión mínima el cartón siempre es el mismo`);
 
 
   } while (acceptCard === null );
 
 
   do {
-    goOn = prompt(`¿Nuevo Número? -> Ok\nSalir del juego -> Cancelar`);
+    if (lastNumber !== 1000) mess = `Ha salido el número ${lastNumber}`
+      
+    goOn = prompt(`${mess}\n\n¿Nuevo número? -> Ok\nSalir del juego -> Cancelar`);
+
+    
 
     let found = false;
     do {
       randomNumber = (Math.floor(Math.random()*15 + 1));
 
-      console.log(randomNumber);
+      lastNumber = randomNumber;
+
       if(usedNumbers.indexOf(randomNumber) === -1){
         usedNumbers.push(randomNumber);
-        console.log(usedNumbers);
 
         matchNumber(randomNumber);
         console.table(showCard(card));
         found = true;
-        goOn = "";
       } 
       
     } while (found === false);
