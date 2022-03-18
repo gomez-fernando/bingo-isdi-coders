@@ -13,10 +13,34 @@ var sing = 0;
 var complete = false;
 var again = true;
 let initialScore = 100;
-// let turns = 0;
-// let score;
 
 var card = [
+  [
+    [
+      {number, matched: false},
+      {number, matched: false}, 
+      {number, matched: false}, 
+      {number, matched: false}, 
+      {number, matched: false}
+    ],
+    [
+      {full: false},
+      {warned: false}
+    ]
+  ],
+  [
+    [
+      {number, matched: false},
+      {number, matched: false}, 
+      {number, matched: false}, 
+      {number, matched: false}, 
+      {number, matched: false}
+    ],
+    [
+      {full: false},
+      {warned: false}
+    ]
+  ],
   [
     [
       {number, matched: false},
@@ -59,13 +83,14 @@ var card = [
 ];
 
 var players = [
-  {name, turns: 0, score: initialScore},
-  {name: "Alex", turns: 40, score: initialScore},
-  {name: "Elena", turns: 48, score: initialScore},
-  {name: "Mario", turns: 60, score: initialScore},
-  {name: "Nines", turns: 38, score: initialScore},
+  {name: "", turns: 0, score: initialScore},
+  {name: "Alex", turns: 0, score: initialScore},
+  {name: "Mario", turns: 0, score: initialScore},
+  {name: "Elena", turns: 0, score: initialScore},
+  {name: "Nines", turns: 0, score: initialScore}
 ];
 
+// function to generate a new bingo card
 const generateCard = () => {
   let numbers = [];
   let lNumber;
@@ -79,7 +104,7 @@ const generateCard = () => {
             
           let set = false;
           do {
-            rNumber = (Math.floor(Math.random()*20 + 1));
+            rNumber = (Math.floor(Math.random()*98 + 1));
         
             lNumber = rNumber;
         
@@ -95,16 +120,12 @@ const generateCard = () => {
         output.push(k);
     }
   }
-
-  // todo ajustar los números gnerados para que llegue a 99 y las lineas del carton a 5
 }
 
 // function to change the matched property in the number object
 const matchNumber = (randomN) => {
-  // to register the turns used by the player
-  players[0].turns++;
-  
   let gotIt = false;
+
   for (let i=0; i < card.length ; i++){
 
     for(let j = 0; j < card[i].length - 1; j++){
@@ -118,7 +139,6 @@ const matchNumber = (randomN) => {
           gotIt = true;
         }
 
-        // todo mejorar esto
         if(card[i][j][k].matched === true) full++;
 
         if(card[i][1].full !== true &&  card[i][1].warned !== true) {
@@ -129,21 +149,16 @@ const matchNumber = (randomN) => {
             sing = i + 1;
 
             if (linesCounter === card.length){
-              // mejorar esto
               bingoComplete = true;
             }
 
             if (bingoComplete === true){
               console.table(showCard(card));
 
-              alert(`**********         **********\n\n             BINGO !!!          \n\n**********         **********\n\nAhora puedes consultar en la consola tu puntuación y el ranking del Top 5`);
+              alert(`**********         **********\n\n             BINGO !!!          \n\n**********         **********`);
 
-// todo ...
               showScore();
-              // showRanking();
               askAgain();
-
-              // skip = true;
             }
           }
         } 
@@ -151,10 +166,10 @@ const matchNumber = (randomN) => {
     }
   }
   
-    if(!complete){
-      console.table(showCard(card));
-    if(sing !== 0) alert(`Ha salido el ${lastNumber}\n\n !!! LÍNEA ${sing} COMPLETA !!!`);
-    }
+  if(!complete){
+    console.table(showCard(card));
+  if(sing !== 0) alert(`Ha salido el ${lastNumber}\n\n !!! LÍNEA ${sing} COMPLETA !!!`);
+  }
   return gotIt;
 }
 
@@ -199,6 +214,15 @@ const askAgain = () => {
   complete = false;
   players[0].turns = 0;
 
+  // reset the players array
+  players = [
+    {name: userName, turns: 0, score: initialScore},
+    {name: "Alex", turns: 0, score: initialScore},
+    {name: "Mario", turns: 0, score: initialScore},
+    {name: "Elena", turns: 0, score: initialScore},
+    {name: "Nines", turns: 0, score: initialScore}
+  ];
+
   // reset the matched property in numbers
   for (let i=0; i < card.length ; i++){
     for(let j = 0; j < card[i].length - 1; j++){
@@ -224,28 +248,49 @@ const askAgain = () => {
 }
 
 const showScore = () => {
+  // set random turns to other players
+  for(let i = 1; i < players.length; i++){
+      players[i].turns = (Math.floor(Math.random()*74 + 25));
+  }
+
+  console.info(`**********     Top 5 players    **********`)
   for(let i = 0; i < players.length; i++){
     players[i].score = initialScore - players[i].turns;
-    console.log(players[i].score );
-    console.log(players[i] );
   }
+
+  players.sort((a, b) => {
+    return b.score - a.score;
+  });
+
+  for(let i = 0; i < players.length; i++){
+    console.log(`${i + 1}) Jugador/a: ${players[i].name}, Score: ${players[i].score}`)
+  };
+
+  let showPlayerTurns;
+  let showPlayerScore;
+  for(let i = 0; i < players.length; i++){
+    if(players[i].name === userName){
+      showPlayerTurns =  players[i].turns;
+      showPlayerScore = initialScore - players[i].turns
+    }         
+  }
+
+  window.alert(`Has gastado ${showPlayerTurns} turnos, tu Score es de ${showPlayerScore} !!!\n\nPuedes ver en la consola el ranking del Top 5 de Bingo Game.`);
+
 }
 
 // App's main function
 const bingo = () =>{
 
-  console.log(players);
-  
   if(again){
-
-    // again = false;
-
     if(userName === ""){
       do {
         userName = prompt(`Bienvenido/a a Bingo Game !!\nIngresa tu nombre`);
         players[0].name = userName;
       
       } while (userName === null || userName === "");
+
+      alert(`*** Sistema de puntuación:\nTodos los jugadores empiezan con 100 puntos y cada turno les resta uno. Al final del juego gana quien mantenga más puntos.`);
     }
   
     if(!complete){
@@ -268,16 +313,21 @@ const bingo = () =>{
     
         gotIt = false;
     
-        (window.confirm(`${mess}\n\n¿Nuevo número? -> Ok\nSalir del juego -> Cancelar`))
-        ? goOn = true
-        : goOn = false;
+        if(window.confirm(`${mess}\n\n¿Nuevo número? -> Ok\nSalir del juego -> Cancelar`)){
+          goOn = true;
+
+          // to register the turns used by the player
+          players[0].turns++;
+        } else{
+          goOn = false;
+        }
     
         sing = 0;
         
     
         let found = false;
         do {
-          randomNumber = (Math.floor(Math.random()*20 + 1));
+          randomNumber = (Math.floor(Math.random()*99 + 1));
     
           lastNumber = randomNumber;
     
@@ -285,7 +335,6 @@ const bingo = () =>{
             usedNumbers.push(randomNumber);
     
             gotIt = matchNumber(randomNumber);
-            // console.table(showCard(card));
             found = true;
           }
           
@@ -296,11 +345,6 @@ const bingo = () =>{
       cancelGame();
     }
   } 
-  // else{
-  //   alert(`FIN DEL PROGRAMA`);
-  //   // throw alert(`FIN DEL PROGRAMA`);
-  // }
-  
 }
 
 bingo();
